@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار العلوم الصناعية - السادس الإعدادي</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="app-container">
+    <div class="card-container">
+        <!-- شاشة البداية -->
+        <div id="start-screen">
+            <div class="emblem-container"></div>
+            <h1 class="main-title">اختبار تمهيدي في العلوم الصناعية</h1>
+            <p class="subtitle">الصف السادس الإعدادي - الفرع الصناعي</p>
+            <button id="start-btn" class="btn btn-primary">ابدأ الاختبار</button>
+        </div>
+
+        <!-- شاشة الاختبار -->
+        <div id="quiz-screen" class="hide">
+            <div id="progress-bar"><div id="progress-bar-full"></div></div>
+            <div id="question-container">
+                <h2 id="question-title"></h2> <!-- عنوان القسم -->
+                
+                <!-- حاوية للأسئلة الفردية -->
+                <p id="single-question-text"></p>
+
+                <!-- حاويات الإجابات المختلفة -->
+                <div id="text-answer-container" class="hide">
+                    <textarea id="text-answer" placeholder="اكتب إجابتك هنا..."></textarea>
+                    <p class="validation-message hide" id="word-count-validation">يجب أن تتكون الإجابة من 5 كلمات على الأقل.</p>
+                </div>
+                <div id="drawing-container" class="hide">
+                    <div class="canvas-toolbar">
+                        <button class="tool-btn active" data-tool="pen">قلم</button>
+                        <button class="tool-btn" data-tool="eraser">ممحاة</button>
+                        <input type="color" class="tool-color-picker" value="#000000">
+                        <button class="tool-btn clear-btn">مسح الكل</button>
+                    </div>
+                    <canvas id="drawing-canvas"></canvas>
+                </div>
+                
+                <!-- ✨ حاويات جديدة للأسئلة المجمعة ✨ -->
+                <div id="tf-group-container" class="question-group hide"></div>
+                <div id="fill-group-container" class="question-group hide"></div>
+            </div>
+            <div class="controls">
+                <button id="next-btn" class="btn">التالي</button>
+                <button id="submit-btn" class="btn btn-submit hide">إنهاء الاختبار</button>
+            </div>
+        </div>
+        
+        <!-- شاشة تم إنهاء الاختبار -->
+        <div id="finished-screen" class="hide">
+            <div id="finished-initial-view">
+                <h2 class="result-title">تم إنهاء الاختبار بنجاح</h2>
+                <p class="subtitle">يرجى تسليم الجهاز إلى المصحح.</p>
+                <button id="show-results-btn" class="btn">عرض النتائج (للمعلم)</button>
+            </div>
+            <div id="password-entry-view" class="hide">
+                 <h3 class="password-title">وضع المصحح</h3>
+                 <p class="subtitle">يرجى إدخال كلمة المرور لعرض النتائج.</p>
+                 <input type="password" id="password-input" class="password-input-inline" placeholder="كلمة المرور">
+                 <p id="password-error" class="error-message"></p>
+                 <button id="password-confirm-btn" class="btn btn-primary">تأكيد وعرض النتائج</button>
+            </div>
+        </div>
+
+        <!-- شاشة النتائج -->
+        <div id="result-screen" class="hide">
+            <div id="final-score-container" class="hide">
+                <h2>النتيجة النهائية للطالب</h2>
+                <p id="final-score-display">0 / 100</p>
+            </div>
+            <h2 class="result-title">تفاصيل الإجابات والتقييم</h2>
+            <div class="results-section hide" id="tf-results-section"></div>
+            <div class="results-section hide" id="teacher-review-section"></div>
+            <div id="results-controls" class="hide">
+                <button id="calculate-score-btn" class="btn btn-primary">احسب النتيجة النهائية</button>
+                <button id="restart-btn" class="btn">إعادة الاختبار</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
