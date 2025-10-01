@@ -106,62 +106,28 @@ restartButton.addEventListener('click', () => location.reload());
 passwordConfirmBtn.addEventListener('click', checkPassword);
 passwordInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') checkPassword(); });
 calculateScoreBtn.addEventListener('click', calculateFinalScore);
-
-// --- ✨ Canvas Event Listeners for Mouse and Touch ✨ ---
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseout', stopDrawing); // Stop drawing if pointer leaves canvas
+canvas.addEventListener('mouseout', stopDrawing);
 canvas.addEventListener('touchstart', startDrawing, { passive: false });
 canvas.addEventListener('touchend', stopDrawing);
 canvas.addEventListener('touchmove', draw, { passive: false });
-
-
 document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         if (e.target.classList.contains('clear-btn')) ctx.clearRect(0, 0, canvas.width, canvas.height);
-        else {
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            setTool(e.target.dataset.tool);
-        }
+        else { document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); setTool(e.target.dataset.tool); }
     });
 });
 document.querySelector('.tool-color-picker').addEventListener('change', (e) => ctx.strokeStyle = e.target.value);
 textAnswerElement.addEventListener('input', validateTextInput);
 
-// --- ✨ وظائف الرسم المحدثة (تعمل باللمس والفأرة) ✨ ---
+// --- وظائف الرسم المحدثة (تعمل باللمس والفأرة) ---
 function initializeCanvas() { canvas.width = document.querySelector('.card-container').offsetWidth - 80; canvas.height = 300; ctx.lineWidth = 3; ctx.lineCap = 'round'; }
-
-function getCoordinates(e) {
-    if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
-}
-
-function startDrawing(e) {
-    e.preventDefault();
-    isDrawing = true;
-    draw(e); 
-}
-
-function stopDrawing() {
-    isDrawing = false;
-    ctx.beginPath();
-}
-
-function draw(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const coords = getCoordinates(e);
-    const rect = canvas.getBoundingClientRect();
-    const x = coords.x - rect.left;
-    const y = coords.y - rect.top;
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-}
-
+function getCoordinates(e) { if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY }; return { x: e.clientX, y: e.clientY }; }
+function startDrawing(e) { e.preventDefault(); isDrawing = true; draw(e); }
+function stopDrawing() { isDrawing = false; ctx.beginPath(); }
+function draw(e) { if (!isDrawing) return; e.preventDefault(); const coords = getCoordinates(e); const rect = canvas.getBoundingClientRect(); const x = coords.x - rect.left; const y = coords.y - rect.top; ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y); }
 function setTool(tool) { ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over'; }
 
 // --- وظائف الاختبار الرئيسية ---
@@ -221,24 +187,15 @@ function showStep() {
     } else { // display === 'single'
         const question = currentSection.questions[singleQuestionSubIndex];
         singleQuestionTextElement.innerText = question.question;
-        if (question.type === 'text') {
-            textAnswerContainer.classList.remove('hide');
-            validateTextInput();
-        } else if (question.type === 'drawing') {
-            drawingContainer.classList.remove('hide');
-            initializeCanvas();
-            nextButton.disabled = false;
-        }
+        if (question.type === 'text') { textAnswerContainer.classList.remove('hide'); validateTextInput(); } 
+        else if (question.type === 'drawing') { drawingContainer.classList.remove('hide'); initializeCanvas(); nextButton.disabled = false; }
     }
 }
 
 function resetState() {
     [tfGroupContainer, fillGroupContainer, textAnswerContainer, drawingContainer].forEach(c => c.classList.add('hide'));
-    singleQuestionTextElement.innerText = '';
-    textAnswerElement.value = '';
-    wordCountValidation.classList.add('hide');
-    nextButton.classList.remove('hide');
-    submitButton.classList.add('hide');
+    singleQuestionTextElement.innerText = ''; textAnswerElement.value = ''; wordCountValidation.classList.add('hide');
+    nextButton.classList.remove('hide'); submitButton.classList.add('hide');
 }
 
 function validateTextInput() {
@@ -288,11 +245,10 @@ function updateProgressBar() { const progress = (currentStep / quizSections.leng
 
 function showResults() {
     autoGradedScore = 0;
-    const autoGradedAnswers = userAnswers.filter(a => a.type === 'tf' && a.userAnswer !== false);
-    const teacherReviewAnswers = userAnswers.filter(a => a.type !== 'tf' || a.userAnswer === false);
+    tfResultsSection.classList.add('hide'); // Hide the auto-graded section permanently
     
-    processAutoGradedSection(autoGradedAnswers, tfResultsSection);
-    
+    const teacherReviewAnswers = userAnswers; // All answers are now manually reviewed
+
     if (teacherReviewAnswers.length > 0) {
         teacherReviewSection.classList.remove('hide');
         const answersBySection = teacherReviewAnswers.reduce((acc, item) => {
@@ -301,7 +257,7 @@ function showResults() {
             return acc;
         }, {});
 
-        teacherReviewSection.innerHTML = `<h3>الأسئلة التي تتطلب مراجعة يدوية</h3>`;
+        teacherReviewSection.innerHTML = `<h3>الأسئلة للمراجعة اليدوية</h3>`;
         for (const sectionTitle in answersBySection) {
             teacherReviewSection.innerHTML += `<h4>${sectionTitle}</h4>`;
             answersBySection[sectionTitle].forEach(item => {
@@ -309,9 +265,12 @@ function showResults() {
                 div.classList.add('review-item');
                 let content = `<p class="review-question">${item.question.replace('[BLANK]', '...')}</p>`;
 
-                if (item.type === 'tf') { // TF answered as 'false'
-                    content += `<p><strong>إجابة الطالب:</strong> خطأ</p>`;
-                    content += `<p><strong>السبب الذي ذكره الطالب:</strong> ${item.userCorrection || 'لم يذكر سبباً.'}</p>`;
+                if (item.type === 'tf') {
+                    const studentAnswerText = item.userAnswer === null ? 'لم تتم الإجابة' : (item.userAnswer ? 'صح' : 'خطأ');
+                    content += `<p><strong>إجابة الطالب:</strong> ${studentAnswerText}</p>`;
+                    if (item.userAnswer === false && item.userCorrection) {
+                        content += `<p style="color: #0d6efd; font-weight: 500;"><strong>السبب الذي ذكره الطالب:</strong> ${item.userCorrection}</p>`;
+                    }
                     content += `<p class="correct-answer"><strong>الإجابة النموذجية:</strong> ${item.correctAnswer ? 'صح' : 'خطأ'}. ${item.correction || ''}</p>`;
                 } else if (item.type === 'drawing') {
                     content += `<p><strong>إجابة الطالب (رسم):</strong></p><img src="${item.userAnswer}" class="review-drawing-img" alt="رسم الطالب">`;
@@ -335,10 +294,11 @@ function showResults() {
     }
 }
 
+// This function is no longer used for TF questions but is kept for potential future use.
 function processAutoGradedSection(answers, sectionElement) {
     if (answers.length > 0) {
         sectionElement.classList.remove('hide');
-        sectionElement.innerHTML = `<h3>التقييم التلقائي (أسئلة الصح)</h3>`;
+        sectionElement.innerHTML = `<h3>التقييم التلقائي</h3>`;
         let correctCount = 0;
         answers.forEach(item => {
             const isCorrect = item.userAnswer === item.correctAnswer;
@@ -347,11 +307,11 @@ function processAutoGradedSection(answers, sectionElement) {
             div.classList.add('review-item');
             let content = `<p class="review-question">${item.question}</p>`;
             if (isCorrect) {
-                content += `<p>إجابة الطالب: صح (صحيحة)</p>`;
+                content += `<p>إجابة الطالب: ${item.userAnswer} (صحيحة)</p>`;
             } else {
-                const studentResponse = item.userAnswer === null ? 'لم تتم الإجابة' : 'صح';
+                const studentResponse = item.userAnswer === null ? 'لم تتم الإجابة' : item.userAnswer;
                 content += `<p>إجابة الطالب: ${studentResponse} (خاطئة)</p>`;
-                content += `<p class="correct-answer">الإجابة الصحيحة: ${item.correctAnswer ? 'صح' : 'خطأ'}</p>`;
+                content += `<p class="correct-answer">الإجابة الصحيحة: ${item.correctAnswer}</p>`;
                 if (item.correction) content += `<p class="correction-text">التصحيح: ${item.correction}</p>`;
             }
             div.innerHTML = content;
@@ -372,6 +332,7 @@ function calculateFinalScore() {
         const percentage = ratingMap[rating] || 0;
         teacherGradedScore += percentage * pointsPerQuestion;
     });
+    // autoGradedScore is always 0 now. The total score comes only from the teacher.
     const totalScore = autoGradedScore + teacherGradedScore;
     finalScoreContainer.classList.remove('hide');
     finalScoreDisplay.textContent = `${totalScore.toFixed(1)} / 100`;
