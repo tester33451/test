@@ -135,3 +135,33 @@ textarea:focus { outline: none; border-color: var(--primary-button-bg); box-shad
 .password-title { font-size: 1.8rem; margin-bottom: 10px; }
 .password-input-inline { max-width: 300px; margin: 0 auto 10px auto; padding: 12px; font-size: 1.1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius); text-align: center; display: block; }
 .error-message { color: var(--wrong-color); font-weight: bold; min-height: 20px; margin-bottom: 10px; }
+
+/* ✨ Styles for Correction Input ✨ */
+.correction-input-container {
+    margin-top: 15px;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+.correction-input-container.show {
+    max-height: 200px;
+    opacity: 1;
+}
+.correction-input {
+    width: 100%;
+    min-height: 80px;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    color: var(--primary-text-color);
+    resize: vertical;
+    margin-top: 5px;
+}
+.correction-input:focus {
+    outline: none;
+    border-color: var(--primary-button-bg);
+}
